@@ -1,17 +1,14 @@
+#ifndef __IMU_H__
+#define __IMU_H__
+
 #include "main.h"
 
-uint16_t accelData[3];
-uint16_t gyroData[3];
-uint8_t raw_data[12];
-uint8_t regs[12];
-uint8_t i;
-uint8_t WHO_AM_I;
+#define SAMPLE_TIME_MS_USB 20
+#define g 9.8100000000f
+#define RAD_TO_DEG 57.2957795131f
+#define COMP_FILT_ALPHA 0.0500000000f
 
-// for each loop macro
-#define foreach(item, array) \
-    for(int keep = 1, \
-            count = 0,\
-            size = sizeof (array) / sizeof *(array); \
-        keep && count != size; \
-        keep = !keep, count++) \
-      for(item = (array) + count; keep; keep = !keep)
+double phiHat_deg = 0.0;
+double thetaHat_deg = 0.0;
+
+#endif /* __IMU_H__ */
