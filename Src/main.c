@@ -104,12 +104,13 @@ int main(void)
 
   /* USER CODE BEGIN 2 */
 
-  IAM_Initialize(&hspi1);
+  IAM_Init(&hspi1);
+  tim2Init(&htim2);
 
   Phi_pid_init(phiHat_deg);
   Theta_pid_init(thetaHat_deg);
 
-  setThrottle(htim2, speed);
+  setThrottle(&htim2, speed);
 
   /* USER CODE END 2 */
 
@@ -130,7 +131,7 @@ int main(void)
 	  uint16_t esc3 = speed + phiDeg + thetaDeg;
 	  uint16_t esc4 = speed - phiDeg - thetaDeg;
 
-	  setSpeeds(htim2, esc1, esc2, esc3, esc4);
+	  setSpeeds(&htim2, esc1, esc2, esc3, esc4);
 
 	  /* USER CODE END WHILE */
 
