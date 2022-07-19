@@ -23,6 +23,9 @@
 #include "usart.h"
 #include "usb_device.h"
 #include "gpio.h"
+#include "imu.h"
+#include "esc.h"
+#include "pid.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -46,6 +49,12 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+
+uint8_t speed = 120;
+uint16_t *IMUread;
+int32_t *eulerAngles;
+int32_t phiDeg;
+int32_t thetaDeg;
 
 /* USER CODE END PV */
 
@@ -93,14 +102,26 @@ int main(void)
   MX_TIM2_Init();
   MX_USB_DEVICE_Init();
   /* USER CODE BEGIN 2 */
-
+  IAM_Initialize(&hspi1);
+  Phi_pid_init(phiHat_deg);
+  Theta_pid_init(thetaHat_deg);
+  setThrottle(htim2, speed);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    /* USER CODE END WHILE */
+	  IMUread = IAM_readAccelGyro(&hspi1);
+	  eulerAngles = complemetaryFilter(*IMUread, *(IMUread+1));
+	  phiDeg = Phi_pid_run();
+	  thetaDeg = Theta_pid_run();
+	  uint16_t esc1 = speed - phiDeg + thetaDeg;
+	  uint16_t esc2 = speed + phiDeg - thetaDeg;
+	  uint16_t esc3 = speed + phiDeg + thetaDeg;
+	  uint16_t esc4 = speed - phiDeg - thetaDeg;
+	  setSpeeds(htim2, esc1, esc2, esc3, esc4);
+	  /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
   }
