@@ -97,7 +97,7 @@ uint8_t IAM_writeBytes(SPI_HandleTypeDef *hspi1, uint8_t addr, uint8_t data){
 
 }
 
-void IAM_Initialize (SPI_HandleTypeDef *hspi1){
+void IAM_Init (SPI_HandleTypeDef *hspi1){
 
 	// Set the PWR_MGMT_1 register (6B hex) bits as 0x01 to activate the gyro
 	IAM_writeBytes(hspi1, 0x6B, 0x01);
@@ -138,16 +138,16 @@ uint8_t IAM_WHOAMI(SPI_HandleTypeDef *hspi1) {
 
 }
 
-int32_t * complemetaryFilter(uint16_t accelData, uint16_t gyroData){
+int32_t * complemetaryFilter(uint16_t* accelData, uint16_t* gyroData){
 
 	// Estimate angles using accelerometer measurements
-	double phiHat_acc_rad = atanf(accelData[1] / accelData[2]);
-	double thetaHat_acc_rad = asinf(accelData[0] / g);
+	double phiHat_acc_rad = atanf(*(accelData + 1) / *(accelData + 2));
+	double thetaHat_acc_rad = asinf(*accelData / g);
 
 	// Transform body rates to Euler rates
-	double phiDot_rps = gyroData[0] + tanf(thetaHat_rad) * (sinf(phiHat_rad) * gyroData[1] + cosf(phiHat_rad) * r_rps);
+	double phiDot_rps = *gyroData + tanf(thetaHat_rad) * (sinf(phiHat_rad) * (*(gyroData + 1)) + cosf(phiHat_rad) * (*(gyroData + 2)));
 
-	double thetaDot_rps = cosf(phiHat_rad) * gyroData[1] - sinf(phiHat_rad) * r_rps;
+	double thetaDot_rps = cosf(phiHat_rad) * gyroData[1] - sinf(phiHat_rad) * (*(gyroData + 2));
 
 
 	phiHat_rad = COMP_FILT_ALPHA * phiHat_acc_rad + (1.0f - COMP_FILT_ALPHA) * (phiHat_rad + (SAMPLE_TIME_MS_USB / 1000.0f) * phiDot_rps);
