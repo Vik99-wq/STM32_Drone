@@ -35,15 +35,19 @@ uint8_t IAM_readBytes(SPI_HandleTypeDef *hspi1, uint8_t* regs, uint8_t *data) {
 
 		IAM_CSHigh();
 		// save data to given pointer
-		*(data + i) = rxBuf[1];
+		if (status == 1) {
+
+			*(data + i) = rxBuf[1];
+
+		}
 	}
 
-	// 1 if error, 0 if good
 	return status;
 
 }
 
 uint16_t * IAM_readAccelGyro(SPI_HandleTypeDef *hspi1){
+
 	IAM_readBytes(hspi1, regs, &raw_data);
 	// goes XYZ
 
@@ -56,9 +60,6 @@ uint16_t * IAM_readAccelGyro(SPI_HandleTypeDef *hspi1){
 	gyroData[0] = (uint16_t) (raw_data[6]<<8 | raw_data[7]);
 	gyroData[1] = (uint16_t) (raw_data[8]<<8 | raw_data[9]);
 	gyroData[2] = (uint16_t) (raw_data[10]<<8 | raw_data[11]);
-
-	// Divide or multiply by sensitivity?
-	// Divide by sensitivity
 
 	// Gyro_Sensitivity = 65.5 LSB for 500dps config
 	// converts the RAW values into dps
@@ -76,7 +77,9 @@ uint16_t * IAM_readAccelGyro(SPI_HandleTypeDef *hspi1){
 	uint16_t retVal[2];
 	retVal[0] = accelData;
 	retVal[1] = gyroData;
+
 	return retVal;
+
 }
 
 uint8_t IAM_writeBytes(SPI_HandleTypeDef *hspi1, uint8_t addr, uint8_t data){
@@ -91,9 +94,11 @@ uint8_t IAM_writeBytes(SPI_HandleTypeDef *hspi1, uint8_t addr, uint8_t data){
 	IAM_CSHigh();
 
 	return status;
+
 }
 
 void IAM_Initialize (SPI_HandleTypeDef *hspi1){
+
 	// Set the PWR_MGMT_1 register (6B hex) bits as 0x01 to activate the gyro
 	IAM_writeBytes(hspi1, 0x6B, 0x01);
 	HAL_Delay(10);
@@ -109,24 +114,32 @@ void IAM_Initialize (SPI_HandleTypeDef *hspi1){
 	// Set the ACCEL_CONFIG register (1C hex) bits as 00010000 (8g full scale)
 	IAM_writeBytes(hspi1, 0x1c, 0b00010000);
 	HAL_Delay(10);
+
 }
 
 // pull CS high
 void IAM_CSHigh(void) {
+
 	HAL_GPIO_WritePin(GPIOA, IMU_NCS_Pin, GPIO_PIN_SET);
+
 }
 
 // pull CS low
 void IAM_CSLow(void) {
+
 	HAL_GPIO_WritePin(GPIOA, IMU_NCS_Pin, GPIO_PIN_RESET);
+
 }
 
 uint8_t IAM_WHOAMI(SPI_HandleTypeDef *hspi1) {
+
 	// Read the WHO_AM_I register (75 hex) byte to access the 8-bit device ID
 	IAM_readBytes(hspi1, 0x75, &WHO_AM_I);
+
 }
 
 int32_t * complemetaryFilter(uint16_t accelData, uint16_t gyroData){
+
 	// Estimate angles using accelerometer measurements
 	double phiHat_acc_rad = atanf(accelData[1] / accelData[2]);
 	double thetaHat_acc_rad = asinf(accelData[0] / g);
@@ -149,33 +162,45 @@ int32_t * complemetaryFilter(uint16_t accelData, uint16_t gyroData){
 	int32_t tempArr[2];
 	tempArr[0] = phiHat_deg;
 	tempArr[1] = thetaHat_deg;
+
 	return tempArr;
+
 }
 
 void Phi_pid_init(double phiHat_deg){
+
 	PID(&d_PID, &phiHat_deg, &phi_PIDOut, &phiSetpoint, 2, 5, 1, _PID_P_ON_E, _PID_CD_DIRECT);
 	PID_SetMode(&d_PID, _PID_MODE_AUTOMATIC);
 	PID_SetSampleTime(&d_PID, 10);
 	PID_SetOutputLimits(&d_PID, -100, 100);
+
 }
 
 int32_t Phi_pid_run(void){
+
 	// run the Phi PID iteration
 	PID_Compute(&d_PID);
 	HAL_Delay(10);
+
 	return phi_PIDOut;
+
 }
 
 void Theta_pid_init(double thetaHat_deg){
+
 	PID(&d_PID, &thetaHat_deg, &theta_PIDOut, &thetaSetpoint, 2, 5, 1, _PID_P_ON_E, _PID_CD_DIRECT);
 	PID_SetMode(&d_PID, _PID_MODE_AUTOMATIC);
 	PID_SetSampleTime(&d_PID, 10);
 	PID_SetOutputLimits(&d_PID, -100, 100);
+
 }
 
 int32_t Theta_pid_run(void){
+
 	// run the Theta PID iteration
 	PID_Compute(&d_PID);
 	HAL_Delay(10);
+
 	return theta_PIDOut;
+
 }
