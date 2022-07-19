@@ -11,17 +11,17 @@ void setSpeeds(TIM_HandleTypeDef htim2, uint8_t esc1, uint8_t esc2, uint8_t esc3
 	HAL_TIM_PWM_START(&htim2, TIM_CHANNEL_3);
 	HAL_TIM_PWM_START(&htim2, TIM_CHANNEL_4);
 
-	// Is pwm signal inverted?
-
 	// put the pwm signal into each tim2's register
 	htim2.Instance->CCR1 = esc1;
 	htim2.Instance->CCR2 = esc2;
 	htim2.Instance->CCR3 = esc3;
 	htim2.Instance->CCR4 = esc4;
+
 }
 
 // get the current tim2 pwm signal strengths
 int getPwm(TIM_HandleTypeDef *htim2, const char *esc) {
+
 	if (strcmp(esc, "esc1") == 0)
 		return htim2->Instance->CCR1;
 	else if (strcmp(esc, "esc2") == 0)
@@ -30,10 +30,14 @@ int getPwm(TIM_HandleTypeDef *htim2, const char *esc) {
 		return htim2->Instance->CCR3;
 	else if (strcmp(esc, "esc4") == 0)
 		return htim2->Instance->CCR4;
+
 	return 1;
+
 }
 
 void setThrottle(TIM_HandleTypeDef htim2, uint8_t throttle){
+
 	setSpeeds(htim2, throttle, throttle, throttle, throttle);
+
 }
 
