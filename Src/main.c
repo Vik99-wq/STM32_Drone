@@ -39,6 +39,8 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+// 100 / 180 (to scale down to 100%) * 10 (to get in ms)
+#define ANGLE_SCALE_FACTOR 5.55555555f
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -50,8 +52,9 @@
 
 /* USER CODE BEGIN PV */
 
-// PWM signal for speed, between 100ms - 200ms
-uint8_t speed = 120;
+// PWM signal for speed, between 1ms - 2ms
+// speed in us
+uint8_t speed = 1200;
 
 uint16_t *IMUread;
 int32_t *eulerAngles;
@@ -137,10 +140,10 @@ int main(void)
 	  thetaDeg = Theta_pid_run();
 
 	  // adjusts the value of each motor according to the PID outputs
-	  uint16_t esc1 = speed - phiDeg + thetaDeg;
-	  uint16_t esc2 = speed + phiDeg - thetaDeg;
-	  uint16_t esc3 = speed + phiDeg + thetaDeg;
-	  uint16_t esc4 = speed - phiDeg - thetaDeg;
+	  uint16_t esc1 = speed - (phiDeg * ANGLE_SCALE_FACTOR) + (thetaDeg * ANGLE_SCALE_FACTOR);
+	  uint16_t esc2 = speed + (phiDeg * ANGLE_SCALE_FACTOR) - (thetaDeg * ANGLE_SCALE_FACTOR);
+	  uint16_t esc3 = speed + (phiDeg * ANGLE_SCALE_FACTOR) + (thetaDeg * ANGLE_SCALE_FACTOR);
+	  uint16_t esc4 = speed - (phiDeg * ANGLE_SCALE_FACTOR) - (thetaDeg * ANGLE_SCALE_FACTOR);
 
 	  // sets the new speeds for the motors
 	  setSpeeds(&htim2, esc1, esc2, esc3, esc4);
