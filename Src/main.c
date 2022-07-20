@@ -50,11 +50,17 @@
 
 /* USER CODE BEGIN PV */
 
+// PWM signal for speed, between 100ms - 200ms
 uint8_t speed = 120;
+
 uint16_t *IMUread;
 int32_t *eulerAngles;
 int32_t phiDeg;
 int32_t thetaDeg;
+
+double phiHat_deg;
+double thetaHat_deg;
+
 
 /* USER CODE END PV */
 
@@ -107,9 +113,10 @@ int main(void)
   IAM_Init(&hspi1);
   tim2Init(&htim2);
 
-  Phi_pid_init(phiHat_deg);
-  Theta_pid_init(thetaHat_deg);
+  Phi_pid_init();
+  Theta_pid_init();
 
+  // set the starting speed
   setThrottle(&htim2, speed);
 
   /* USER CODE END 2 */
@@ -119,18 +126,23 @@ int main(void)
   while (1)
   {
 
+	  // read the current gyro and accel measurements
 	  IMUread = IAM_readAccelGyro(&hspi1);
 
-	  eulerAngles = complemetaryFilter(*IMUread, *(IMUread+1));
+	  // converts the body angles to euler angles
+	  complemetaryFilter(*IMUread, *(IMUread+1));
 
+	  // PID calculates adjusted euler angles to level the drone
 	  phiDeg = Phi_pid_run();
 	  thetaDeg = Theta_pid_run();
 
+	  // adjusts the value of each motor according to the PID outputs
 	  uint16_t esc1 = speed - phiDeg + thetaDeg;
 	  uint16_t esc2 = speed + phiDeg - thetaDeg;
 	  uint16_t esc3 = speed + phiDeg + thetaDeg;
 	  uint16_t esc4 = speed - phiDeg - thetaDeg;
 
+	  // sets the new speeds for the motors
 	  setSpeeds(&htim2, esc1, esc2, esc3, esc4);
 
 	  /* USER CODE END WHILE */
