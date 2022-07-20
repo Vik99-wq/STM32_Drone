@@ -171,10 +171,10 @@ void Phi_pid_init(){
 	PID(&d_PID, &phiHat_deg, &phi_PIDOut, &phiSetpoint, 2, 5, 1, _PID_P_ON_E, _PID_CD_DIRECT);
 	// set to auto mode
 	PID_SetMode(&d_PID, _PID_MODE_AUTOMATIC);
-	// PID is being run every 10ms
-	PID_SetSampleTime(&d_PID, 10);
-	// outputs must be -100deg to 100deg
-	PID_SetOutputLimits(&d_PID, -100, 100);
+	// PID is being run every 30ms
+	PID_SetSampleTime(&d_PID, 30);
+	// outputs must be -180deg to 180deg
+	PID_SetOutputLimits(&d_PID, -180, 180);
 
 }
 
@@ -194,10 +194,10 @@ void Theta_pid_init(){
 	PID(&d_PID, &thetaHat_deg, &theta_PIDOut, &thetaSetpoint, 2, 5, 1, _PID_P_ON_E, _PID_CD_DIRECT);
 	// set to auto mode
 	PID_SetMode(&d_PID, _PID_MODE_AUTOMATIC);
-	// PID is being run every 10ms
-	PID_SetSampleTime(&d_PID, 10);
-	// outputs must be -100deg to 100deg
-	PID_SetOutputLimits(&d_PID, -100, 100);
+	// PID is being run every 30ms
+	PID_SetSampleTime(&d_PID, 30);
+	// outputs must be -180deg to 180deg
+	PID_SetOutputLimits(&d_PID, -180, 180);
 
 }
 
