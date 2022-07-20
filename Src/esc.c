@@ -35,12 +35,14 @@ int getPwm(TIM_HandleTypeDef * htim2, const char *esc) {
 
 }
 
+// use if the speeds of all motors are equivalent 
 void setThrottle(TIM_HandleTypeDef * htim2, uint8_t throttle){
 
 	setSpeeds(htim2, throttle, throttle, throttle, throttle);
 
 }
 
+// initialize timer 2
 void tim2Init(TIM_HandleTypeDef *htim2){
 
 	HAL_TIM_PWM_Init(htim2);
