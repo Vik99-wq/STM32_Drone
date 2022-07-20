@@ -6,10 +6,10 @@
 void setSpeeds(TIM_HandleTypeDef * htim2, uint8_t esc1, uint8_t esc2, uint8_t esc3, uint8_t esc4){
 
 	// start tim2 for pwm
-	HAL_TIM_PWM_START(htim2, TIM_CHANNEL_1);
-	HAL_TIM_PWM_START(htim2, TIM_CHANNEL_2);
-	HAL_TIM_PWM_START(htim2, TIM_CHANNEL_3);
-	HAL_TIM_PWM_START(htim2, TIM_CHANNEL_4);
+	HAL_TIM_PWM_Start(htim2, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Start(htim2, TIM_CHANNEL_2);
+	HAL_TIM_PWM_Start(htim2, TIM_CHANNEL_3);
+	HAL_TIM_PWM_Start(htim2, TIM_CHANNEL_4);
 
 	// put the pwm signal into each tim2's register
 	htim2->Instance->CCR1 = esc1;
