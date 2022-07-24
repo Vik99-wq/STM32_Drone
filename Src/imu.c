@@ -94,6 +94,20 @@ uint8_t IAM_readBytes(SPI_HandleTypeDef *hspi1, uint8_t addr, uint8_t *data)
 
 }
 
+uint8_t IAM_writeBytes(SPI_HandleTypeDef *hspi1, uint8_t addr, uint8_t data)
+{
+	uint8_t txBuf[2] = {addr, data};
+
+	IAM_CSLow();
+
+	// data transmit
+	uint8_t status = (HAL_SPI_Transmit(hspi1, txBuf, 2, HAL_MAX_DELAY) == HAL_OK);
+
+	IAM_CSHigh();
+
+	return status;
+}
+
 uint16_t * IAM_readAccelGyro(SPI_HandleTypeDef *hspi1)
 {
 	IAM_read_AccelGyro_Bytes(hspi1, regs, &raw_data);
@@ -155,60 +169,6 @@ uint16_t * IAM_readAccelGyro(SPI_HandleTypeDef *hspi1)
 	return retVal;
 }
 
-uint8_t IAM_writeBytes(SPI_HandleTypeDef *hspi1, uint8_t addr, uint8_t data)
-{
-	uint8_t txBuf[2] = {addr, data};
-
-	IAM_CSLow();
-
-	// data transmit
-	uint8_t status = (HAL_SPI_Transmit(hspi1, txBuf, 2, HAL_MAX_DELAY) == HAL_OK);
-
-	IAM_CSHigh();
-
-	return status;
-}
-
-void IAM_Init (SPI_HandleTypeDef *hspi1)
-{
-	// set the PWR_MGMT_1 register (6B hex) bits as 0x01 to activate the gyro
-	IAM_writeBytes(hspi1, 0x6B, 0x01);
-	HAL_Delay(10);
-
-	// set the SMPLRT_DIV register (19 hex) bits as 0x09 to divide sample rate by 1khz to 100hz
-	IAM_writeBytes(hspi1, 0x19, 0x09);
-	HAL_Delay(10);
-
-	// set the GYRO_CONFIG register (1B hex) bits as 00001000 (500dps full scale)
-	IAM_writeBytes(hspi1, 0x1B, 0b00001000);
-	HAL_Delay(10);
-
-	// set the ACCEL_CONFIG register (1C hex) bits as 00010000 (8g full scale)
-	IAM_writeBytes(hspi1, 0x1c, 0b00010000);
-	HAL_Delay(10);
-}
-
-// pull CS high
-void IAM_CSHigh()
-{
-	HAL_GPIO_WritePin(GPIOA, IMU_NCS_Pin, GPIO_PIN_SET);
-}
-
-// pull CS low
-void IAM_CSLow()
-{
-	HAL_GPIO_WritePin(GPIOA, IMU_NCS_Pin, GPIO_PIN_RESET);
-}
-
-// IAM Identifier
-uint8_t IAM_WHOAMI(SPI_HandleTypeDef *hspi1)
-{
-	// read the WHO_AM_I register (75 hex) byte to access the 8-bit device ID
-	uint8_t status = IAM_readBytes(hspi1, 0x75, &WHO_AM_I);
-
-	return status;
-}
-
 // Transform body angles to euler angles referenced to the earth
 void complemetaryFilter(uint16_t* accelData, uint16_t* gyroData)
 {
@@ -261,6 +221,46 @@ void signData(uint16_t* tempData, uint16_t* oldData, int16_t* signedData, uint8_
 	{
 		*(isNegitive + i) = 1;
 	}
+}
+
+// pull CS high
+void IAM_CSHigh()
+{
+	HAL_GPIO_WritePin(GPIOA, IMU_NCS_Pin, GPIO_PIN_SET);
+}
+
+// pull CS low
+void IAM_CSLow()
+{
+	HAL_GPIO_WritePin(GPIOA, IMU_NCS_Pin, GPIO_PIN_RESET);
+}
+
+// IAM Identifier
+uint8_t IAM_WHOAMI(SPI_HandleTypeDef *hspi1)
+{
+	// read the WHO_AM_I register (75 hex) byte to access the 8-bit device ID
+	uint8_t status = IAM_readBytes(hspi1, 0x75, &WHO_AM_I);
+
+	return status;
+}
+
+void IAM_Init (SPI_HandleTypeDef *hspi1)
+{
+	// set the PWR_MGMT_1 register (6B hex) bits as 0x01 to activate the gyro
+	IAM_writeBytes(hspi1, 0x6B, 0x01);
+	HAL_Delay(10);
+
+	// set the SMPLRT_DIV register (19 hex) bits as 0x09 to divide sample rate by 1khz to 100hz
+	IAM_writeBytes(hspi1, 0x19, 0x09);
+	HAL_Delay(10);
+
+	// set the GYRO_CONFIG register (1B hex) bits as 00001000 (500dps full scale)
+	IAM_writeBytes(hspi1, 0x1B, 0b00001000);
+	HAL_Delay(10);
+
+	// set the ACCEL_CONFIG register (1C hex) bits as 00010000 (8g full scale)
+	IAM_writeBytes(hspi1, 0x1c, 0b00010000);
+	HAL_Delay(10);
 }
 
 void Phi_pid_init()
