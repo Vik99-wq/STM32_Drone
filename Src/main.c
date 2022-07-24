@@ -39,8 +39,10 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+
 // 100 / 180 (to scale down to 100%) * 10 (to get in ms)
 #define ANGLE_SCALE_FACTOR 5.55555555f
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -54,7 +56,7 @@
 
 // PWM signal for speed, between 1ms - 2ms
 // speed in us
-uint8_t speed = 1200;
+uint16_t speed = 1200;
 
 uint16_t *IMUread;
 int32_t *eulerAngles;
